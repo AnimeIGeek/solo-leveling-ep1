@@ -1,4 +1,43 @@
-<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -48,7 +87,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-top: 60px;
+            padding-top: 160px; /* Dobrado para refletir a nova altura do header */
             overflow-x: hidden;
             transition: background 0.3s ease, color 0.3s ease;
         }
@@ -58,14 +97,14 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 60px;
+            height: 160px; /* Dobrado de 80px para 160px */
             background: rgba(18, 21, 32, 0.85);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 var(--spacing-md);
+            padding: 0 var(--spacing-md) var(--spacing-md) var(--spacing-md); /* Aumentado padding vertical */
             z-index: 1001;
             box-shadow: 0 2px 5px var(--shadow-color);
         }
@@ -86,45 +125,50 @@
 
         .header__nav {
             display: flex;
-            gap: var(--spacing-sm);
+            gap: var(--spacing-md); /* Aumentado gap */
+            align-items: center;
         }
 
-        .header__theme-toggle {
+        .header__theme-toggle,
+        .header__button {
             font-family: 'Ubuntu', sans-serif;
             font-weight: 500;
-            font-size: var(--font-size-sm);
-            padding: 8px 14px;
-            border-radius: 6px;
+            font-size: var(--font-size-md); /* Aumentado para melhor legibilidade */
+            padding: 20px 30px; /* Dobrado padding dos botões */
+            border-radius: 8px; /* Aumentado border-radius */
             background: #2a2a2a;
             color: rgba(255, 255, 255, 0.9);
             border: none;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 10px; /* Aumentado gap */
             transition: all 0.3s ease;
         }
 
-        [data-theme="light"] .header__theme-toggle {
+        [data-theme="light"] .header__theme-toggle,
+        [data-theme="light"] .header__button {
             background: #e0e0e0;
             color: #1f2937;
         }
 
-        .header__theme-toggle:hover {
+        .header__theme-toggle:hover,
+        .header__button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 2px 4px var(--shadow-color);
+            box-shadow: 0 4px 8px var(--shadow-color); /* Aumentado shadow */
             background: #3a3a3a;
             color: #ffffff;
         }
 
-        [data-theme="light"] .header__theme-toggle:hover {
+        [data-theme="light"] .header__theme-toggle:hover,
+        [data-theme="light"] .header__button:hover {
             background: #d0d0d0;
         }
 
         .frame-container {
-            width: 100%; /* Encosta nas laterais */
+            width: 100%;
             margin: var(--spacing-section) 0;
-            padding: 30px 5px; /* Padding vertical grande, horizontal mínimo */
+            padding: 30px 5px;
             background: #121520;
             box-shadow: 0 6px 30px var(--shadow-color);
             position: relative;
@@ -146,8 +190,8 @@
         .frame-wrapper {
             position: relative;
             width: 100%;
-            padding-top: 56.25%; /* Proporção 16:9 do player nativo do Google Drive */
-            min-height: 630px; /* Garante altura mínima */
+            padding-top: 56.25%;
+            min-height: 630px;
             overflow: hidden;
         }
 
@@ -161,14 +205,26 @@
             box-shadow: 0 4px 16px var(--shadow-color);
         }
 
+        .frame-overlay {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 75px;
+            height: 75px;
+            background: transparent;
+            pointer-events: auto;
+            z-index: 10;
+        }
+
         .footer {
             width: 100%;
             background: rgba(18, 21, 32, 0.85);
             color: var(--text-secondary);
             text-align: center;
-            padding: 16px 0;
+            padding: 40px 0; /* Dobrado de 20px para 40px */
             margin-top: var(--spacing-section);
             box-shadow: 0 -2px 5px var(--shadow-color);
+            min-height: 160px; /* Dobrado de 80px para 160px */
         }
 
         [data-theme="light"] .footer {
@@ -179,7 +235,8 @@
         .footer a {
             color: var(--highlight-color);
             text-decoration: none;
-            margin: 0 10px;
+            margin: 0 15px; /* Aumentado margin */
+            font-size: var(--font-size-md); /* Aumentado tamanho da fonte */
             transition: color 0.2s ease;
         }
 
@@ -195,6 +252,8 @@
             <button class="header__theme-toggle" aria-label="Alternar tema">
                 <i class="fas fa-moon"></i> Tema
             </button>
+            <button class="header__button" onclick="window.location.href='#'">Voltar</button>
+            <button class="header__button" onclick="window.location.href='https://4br.me/BaixarSoloep1'">Download Solo Leveling Ep 1</button>
         </nav>
     </header>
 
@@ -204,6 +263,7 @@
             <iframe src="https://drive.google.com/file/d/1bpoYBI8slzuyiHwKXbn83BL_4wpwZjjY/preview" 
                     allow="autoplay; encrypted-media" 
                     allowfullscreen></iframe>
+            <div class="frame-overlay"></div>
         </div>
     </div>
 
@@ -215,6 +275,46 @@
         </p>
     </div>
 
+    <script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const themeToggle = document.querySelector('.header__theme-toggle');
