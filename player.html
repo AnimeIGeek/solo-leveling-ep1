@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1280, initial-scale=0.3, maximum-scale=0.3, user-scalable=no">
+    <title>Solo Leveling - Frame Exclusivo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Jura:wght@300..700&family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --text-primary: #f9fafb;
+            --text-secondary: #b8c0d0;
+            --background: #070b17;
+            --surface: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.08);
+            --shadow-color: rgba(0, 0, 0, 0.6);
+            --highlight-color: #e50914;
+            --spacing-sm: 12px;
+            --spacing-md: 20px;
+            --spacing-section: 40px;
+            --font-size-sm: 0.9rem;
+            --font-size-md: 1.1rem;
+            --font-size-lg: 1.5rem;
+        }
+
+        [data-theme="light"] {
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --background: #f3f4f6;
+            --surface: rgba(0, 0, 0, 0.05);
+            --border: rgba(0, 0, 0, 0.1);
+            --shadow-color: rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Jura', sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 60px;
+            overflow-x: hidden;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(18, 21, 32, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 var(--spacing-md);
+            z-index: 1001;
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+
+        [data-theme="light"] .header {
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .header__title {
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 700;
+            font-size: var(--font-size-lg);
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .header__nav {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .header__theme-toggle {
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 500;
+            font-size: var(--font-size-sm);
+            padding: 8px 14px;
+            border-radius: 6px;
+            background: #2a2a2a;
+            color: rgba(255, 255, 255, 0.9);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="light"] .header__theme-toggle {
+            background: #e0e0e0;
+            color: #1f2937;
+        }
+
+        .header__theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px var(--shadow-color);
+            background: #3a3a3a;
+            color: #ffffff;
+        }
+
+        [data-theme="light"] .header__theme-toggle:hover {
+            background: #d0d0d0;
+        }
+
+        .frame-container {
+            width: 100%; /* Encosta nas laterais */
+            margin: var(--spacing-section) 0;
+            padding: 30px 5px; /* Padding vertical grande, horizontal mínimo */
+            background: #121520;
+            box-shadow: 0 6px 30px var(--shadow-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        [data-theme="light"] .frame-container {
+            background: #ffffff;
+        }
+
+        .carousel-title {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        .frame-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* Proporção 16:9 do player nativo do Google Drive */
+            min-height: 630px; /* Garante altura mínima */
+            overflow: hidden;
+        }
+
+        .frame-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            box-shadow: 0 4px 16px var(--shadow-color);
+        }
+
+        .footer {
+            width: 100%;
+            background: rgba(18, 21, 32, 0.85);
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 16px 0;
+            margin-top: var(--spacing-section);
+            box-shadow: 0 -2px 5px var(--shadow-color);
+        }
+
+        [data-theme="light"] .footer {
+            background: rgba(255, 255, 255, 0.85);
+            color: var(--text-primary);
+        }
+
+        .footer a {
+            color: var(--highlight-color);
+            text-decoration: none;
+            margin: 0 10px;
+            transition: color 0.2s ease;
+        }
+
+        .footer a:hover {
+            color: var(--highlight-color);
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <header class="header">
+        <div class="header__title">Solo Leveling - Frame Exclusivo</div>
+        <nav class="header__nav">
+            <button class="header__theme-toggle" aria-label="Alternar tema">
+                <i class="fas fa-moon"></i> Tema
+            </button>
+        </nav>
+    </header>
+
+    <div class="frame-container">
+        <div class="carousel-title">Frame Exclusivo - Solo Leveling</div>
+        <div class="frame-wrapper">
+            <iframe src="https://drive.google.com/file/d/1bpoYBI8slzuyiHwKXbn83BL_4wpwZjjY/preview" 
+                    allow="autoplay; encrypted-media" 
+                    allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2025 Solo Leveling Frame Exclusivo. Todos os direitos reservados. Desenvolvido por xAI.</p>
+        <p>Entre em contato:
+            <a href="https://api.whatsapp.com/send?phone=5535984072446" target="_blank" aria-label="Contato via WhatsApp"><i class="fab fa-whatsapp"></i> WhatsApp</a> |
+            <a href="https://www.facebook.com/sololeveling" target="_blank" aria-label="Página do Facebook"><i class="fab fa-facebook"></i> Facebook</a>
+        </p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.querySelector('.header__theme-toggle');
+            const body = document.body;
+
+            function toggleTheme() {
+                const currentTheme = body.dataset.theme;
+                body.dataset.theme = currentTheme === 'light' ? 'dark' : 'light';
+                themeToggle.innerHTML = `<i class="fas ${body.dataset.theme === 'light' ? 'fa-sun' : 'fa-moon'}"></i> Tema`;
+            }
+
+            themeToggle.addEventListener('click', toggleTheme);
+        });
+    </script>
+</body>
+</html>
